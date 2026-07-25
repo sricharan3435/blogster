@@ -1,13 +1,21 @@
 import { Hono } from "hono";
 import { sign } from "hono/jwt";
-import { verify } from "hono/jwt"; 
+import { authMiddleware } from "./middleware/auth";
 
 type Bindings = {
   mini_blog_db: D1Database;
   JWT_SECRET: string
 };
 
-const app = new Hono<{ Bindings: Bindings }>();
+type Variables = {
+  user: any;
+};
+
+const app = new Hono<{ 
+  Bindings: Bindings;
+  Variables : Variables; 
+}>();
+
 
 app.get("/blogs", async(c) => {
   const blogs = await c.env.mini_blog_db
@@ -41,29 +49,9 @@ app.get("/blogs/:id", async (c) => {
   });
 });  
 
-app.post("/blogs", async (c) => {
+app.post("/blogs",authMiddleware, async(c) => {
 
-  //Here we have to read the header sent by client
-  const authHeader = c.req.header("Authorization");
-
-  //Checks if the client sent the authHeader, if not stop
-  if(!authHeader) {
-    return c.json(
-      {
-        success: false,
-        message: "Authorization header missing",
-      },
-      401
-    );
-  }
-
-  //first we are using jwt in blogs cuz only logged-in users can create blogs
-
-  //spliting the token cuz it contains some extra string "Bearer" like that but we only need token
-  const token = authHeader.split(" ")[1];
-
-  //verifying the token contains -> token, secret_key, hasing algo
-  const payload = await verify(token, c.env.JWT_SECRET, "HS256");
+  const user = c.get("user");
 
   const body = await c.req.json();
 
@@ -71,16 +59,19 @@ app.post("/blogs", async (c) => {
     .prepare(
       "INSERT INTO blogs (title, content, user_id) VALUES (?, ?, ?)"
     )
-    .bind(body.title, body.content, payload.id)
-    .run();
+    .bind(body.title, body.content, user.id)
+    .run()
 
   return c.json({
     message: "Blog created successfully",
   });
+
 });
 
-
-app.put("/blogs/:id", async (c) => {
+app.put("/blogs/:id", authMiddleware, async (c) => {
+  
+  const user = c.get("user");
+    
   const id = c.req.param("id");
 
   const body = await c.req.json();
@@ -100,6 +91,15 @@ app.put("/blogs/:id", async (c) => {
   );
   }
 
+  if(user.id !== blog.user_id){
+    return c.json({
+      success: false,
+      message: "Permission declined"
+    },
+    403
+  );
+  }
+
   await c.env.mini_blog_db
     .prepare("UPDATE blogs SET title = ?, content = ? WHERE id = ?")
     .bind(body.title, body.content, id)
@@ -109,9 +109,15 @@ app.put("/blogs/:id", async (c) => {
     success: true,
     message: "Blog updated sucessfully",
   });
+
+  
 });
 
-app.delete("/blogs/:id", async (c) => {
+
+app.delete("/blogs/:id", authMiddleware, async (c) => {
+
+  const user = c.get("user");
+
   const id = c.req.param("id");
 
   const blog = await c.env.mini_blog_db
@@ -129,6 +135,15 @@ app.delete("/blogs/:id", async (c) => {
     );
   }
 
+  if(user.id !== blog.user_id){
+    return c.json({
+      success: false,
+      message: "Permission rejected"
+    },
+    403
+    );
+  }
+
   await c.env.mini_blog_db
   .prepare("DELETE FROM blogs WHERE id = ?")
   .bind(id)
@@ -140,7 +155,7 @@ app.delete("/blogs/:id", async (c) => {
       message: "Blog deleted successfully"
     }
   );
-
+  
 });
 
 
