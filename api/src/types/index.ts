@@ -26,3 +26,7 @@ export type Variables = {
     user: AuthUser;
     validatedBody: unknown;
 };
+
+export type BlogWithAuthor = Blog & {
+    author_name: string;
+};
