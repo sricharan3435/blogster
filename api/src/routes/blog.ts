@@ -3,7 +3,6 @@ import { authMiddleware } from "../middleware/auth";
 import type { Bindings, Variables, Blog, BlogWithAuthor } from "../types";
 import { blogSchema } from "../schemas/blog";
 import { validate } from "../middleware/validate";
-import { success } from "zod";
 
 const blogRoutes = new Hono<{
     Bindings: Bindings;
@@ -12,8 +11,8 @@ const blogRoutes = new Hono<{
 
 blogRoutes.get("/blogs", async(c) => {
 
-  let page = Number(c.req.query("page"))  || 1;
-  let limit = Number(c.req.query("limit")) || 10;
+  let page = Math.floor(Number(c.req.query("page")))  || 1;
+  let limit = Math.floor(Number(c.req.query("limit"))) || 10;
 
   const search = c.req.query("search") || "";
   const searchPattern = `%${search}%`;
@@ -68,8 +67,8 @@ blogRoutes.get("/blogs", async(c) => {
 blogRoutes.get("/blogs/me", authMiddleware, async (c) => {
   const user = c.get("user");
 
-  let page = Number(c.req.query("page")) || 1;
-  let limit = Number(c.req.query("limit")) || 10;
+  let page = Math.floor(Number(c.req.query("page"))) || 1;
+  let limit = Math.floor(Number(c.req.query("limit"))) || 10;
 
   if(page<1){
     page = 1;
@@ -118,7 +117,17 @@ blogRoutes.get("/blogs/me", authMiddleware, async (c) => {
 });
 
 blogRoutes.get("/blogs/:id", async (c) => {
-  const id = c.req.param("id");
+  const id = Number(c.req.param("id"));
+
+  if(!Number.isInteger(id) || id < 1){
+    return c.json(
+      {
+        success: false,
+        message: "Invalid blog ID",
+      },
+      400
+    );
+  }
 
   const blog = await c.env.mini_blog_db
     .prepare(`
@@ -171,7 +180,17 @@ blogRoutes.put("/blogs/:id", authMiddleware, validate(blogSchema), async (c) => 
   
   const user = c.get("user");
     
-  const id = c.req.param("id");
+  const id = Number(c.req.param("id"));
+
+  if (!Number.isInteger(id) || id < 1) {
+  return c.json(
+    {
+      success: false,
+      message: "Invalid blog ID",
+    },
+    400
+  );
+}
 
   const body = c.get("validatedBody");
 
@@ -217,7 +236,17 @@ blogRoutes.delete("/blogs/:id", authMiddleware, async (c) => {
 
   const user = c.get("user");
 
-  const id = c.req.param("id");
+  const id = Number(c.req.param("id"));
+
+  if (!Number.isInteger(id) || id < 1) {
+  return c.json(
+    {
+      success: false,
+      message: "Invalid blog ID",
+    },
+    400
+  );
+}
 
   const blog = await c.env.mini_blog_db
   .prepare("SELECT * FROM blogs WHERE id = ?")
