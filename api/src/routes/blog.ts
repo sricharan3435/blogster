@@ -3,6 +3,7 @@ import { authMiddleware } from "../middleware/auth";
 import type { Bindings, Variables, Blog, BlogWithAuthor } from "../types";
 import { blogSchema } from "../schemas/blog";
 import { validate } from "../middleware/validate";
+import { validateBlogId } from "../middleware/validateBlogId";
 
 const blogRoutes = new Hono<{
     Bindings: Bindings;
@@ -116,18 +117,9 @@ blogRoutes.get("/blogs/me", authMiddleware, async (c) => {
     
 });
 
-blogRoutes.get("/blogs/:id", async (c) => {
-  const id = Number(c.req.param("id"));
+blogRoutes.get("/blogs/:id", validateBlogId, async (c) => {
 
-  if(!Number.isInteger(id) || id < 1){
-    return c.json(
-      {
-        success: false,
-        message: "Invalid blog ID",
-      },
-      400
-    );
-  }
+  const id = c.get("blogId");
 
   const blog = await c.env.mini_blog_db
     .prepare(`
@@ -176,21 +168,11 @@ blogRoutes.post("/blogs",authMiddleware, validate(blogSchema), async(c) => {
 
 });
 
-blogRoutes.put("/blogs/:id", authMiddleware, validate(blogSchema), async (c) => {
+blogRoutes.put("/blogs/:id", authMiddleware, validateBlogId , validate(blogSchema), async (c) => {
   
   const user = c.get("user");
     
-  const id = Number(c.req.param("id"));
-
-  if (!Number.isInteger(id) || id < 1) {
-  return c.json(
-    {
-      success: false,
-      message: "Invalid blog ID",
-    },
-    400
-  );
-}
+  const id = c.get("blogId");
 
   const body = c.get("validatedBody");
 
@@ -232,21 +214,11 @@ blogRoutes.put("/blogs/:id", authMiddleware, validate(blogSchema), async (c) => 
 });
 
 
-blogRoutes.delete("/blogs/:id", authMiddleware, async (c) => {
+blogRoutes.delete("/blogs/:id", authMiddleware, validateBlogId, async (c) => {
 
   const user = c.get("user");
 
-  const id = Number(c.req.param("id"));
-
-  if (!Number.isInteger(id) || id < 1) {
-  return c.json(
-    {
-      success: false,
-      message: "Invalid blog ID",
-    },
-    400
-  );
-}
+  const id  = c.get("blogId");    
 
   const blog = await c.env.mini_blog_db
   .prepare("SELECT * FROM blogs WHERE id = ?")

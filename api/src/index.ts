@@ -3,6 +3,7 @@ import type { Bindings, Variables } from "./types";
 import blogRoutes from "./routes/blog";
 import authRoutes from "./routes/auth";
 import { success } from "zod";
+import { cors } from "hono/cors";
 
 
 const app = new Hono<{ 
@@ -25,6 +26,13 @@ app.onError((err, c) => {
 // app.get("/test-error", () => {
 //   throw new Error("Something went wrong!");
 // });
+
+app.use(
+  "*",
+  cors({
+    origin: "http://localhost:5173",
+  })
+);
 
 app.route("/", blogRoutes);
 
