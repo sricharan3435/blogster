@@ -50,3 +50,35 @@
   border: 1px solid #e5e7eb;
   border-radius: 8px;
 }
+
+.blog-card {
+  padding: 20px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.blog-card:last-child {
+  border-bottom: none;
+}
+
+.blog-card h3 {
+  margin: 0 0 10px;
+  font-size: 22px;
+  color: #1f2937;
+}
+
+.blog-card p {
+  line-height: 1.6;
+  color: #4b5563;
+}
+
+.blog-card .blog-author {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.blog-card .blog-date {
+  margin: 4px 0 16px;
+  font-size: 13px;
+  color: #9ca3af;
+}
