@@ -6,12 +6,18 @@ function App() {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState(null);
 
   useEffect(() => {
     async function fetchBlogs() {
       try {
+
+      setLoading(true);
+      setError("");
+
       const response = await fetch(
-        "https://api.sricharan3435.workers.dev/blogs"
+        `https://api.sricharan3435.workers.dev/blogs?page=${page}&limit=5`
       );
 
       if(!response.ok){
@@ -20,6 +26,7 @@ function App() {
 
       const data = await response.json();
       setBlogs(data.blogs);
+      setPagination(data.pagination);
 
       } 
       catch (err){
@@ -31,7 +38,7 @@ function App() {
     }  
 
     fetchBlogs();
-  }, []);
+  }, [page]);
 
   return (
     <div className="app">
@@ -65,6 +72,26 @@ function App() {
             </div>  
           ))
         )}
+        </div>
+
+        <div className="pagination-controls">
+          <button
+            onClick={() => setPage(page - 1)}
+            disabled={page === 1}
+          >
+            Previous
+          </button>
+          
+          <span>
+            Page {page} of {pagination?.totalPages || 1}
+          </span>
+
+          <button
+            onClick={() => setPage(page + 1)}
+            disabled={page === pagination?.totalPages}
+          >
+              Next
+          </button>
         </div>
       </main>
     </div>
