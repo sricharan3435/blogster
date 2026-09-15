@@ -21,11 +21,13 @@
   gap: 12px;
 }
 
-.header button {
+.header nav a {
   padding: 8px 16px;
   border: 1px solid #d1d5db;
   border-radius: 6px;
   background: white;
+  color: #222;
+  text-decoration: none;
   cursor: pointer;
 }
 
