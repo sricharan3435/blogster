@@ -9,6 +9,13 @@ function Home() {
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState(null);
 
+  const token = localStorage.getItem("token");
+
+  function handleLogout() {
+    localStorage.removeItem("token");
+    window.location.reload();
+  }
+
   useEffect(() => {
     async function fetchBlogs() {
       try {
@@ -44,8 +51,14 @@ function Home() {
         <h1>Mini Blog</h1>
 
         <nav>
-          <Link to="/login">Login</Link>
-          <Link to="/register">Register</Link>
+          {token ? (
+            <button onClick={handleLogout}>Logout</button>
+          ) : (
+            <>
+              <Link to="/login">Login</Link>
+              <Link to="/register">Register</Link>
+            </>
+          )}
         </nav>
       </header>
 

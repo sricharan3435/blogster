@@ -1,14 +1,42 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [message, setMessage] = useState("");
 
-    function handleSubmit(e) {
+    const navigate = useNavigate();
+
+    async function handleSubmit(e) {
         e.preventDefault();
 
-        console.log(email);
-        console.log(password);
+        const response = await fetch(
+            "https://api.sricharan3435.workers.dev/login",
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    email: email,
+                    password: password,
+                }),
+            }
+        );
+
+        const data = await response.json();
+        
+        if(!response.ok) {
+            setMessage(data.message);
+            return;
+        }
+
+        setMessage(data.message);
+        localStorage.setItem("token", data.token);
+
+        navigate("/");
     }
 
     return (
@@ -31,6 +59,7 @@ function Login() {
                 />  
 
                 <button type="submit">Login</button>
+                {message && <p>{message}</p>}
             </form>
         </div>
     );
