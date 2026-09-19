@@ -52,7 +52,11 @@ function Home() {
 
         <nav>
           {token ? (
+          <>
+            <Link to="/my-blogs">My Blogs</Link>
+            <Link to="/create">Create Blog</Link>  
             <button onClick={handleLogout}>Logout</button>
+          </>  
           ) : (
             <>
               <Link to="/login">Login</Link>

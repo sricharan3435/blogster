@@ -1,10 +1,14 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function Register() {
 
     const[name, setName] = useState("");
     const[email, setEmail] = useState("");
     const[password, setPassword] = useState("");
+    const[message, setMessage] = useState("");
+
+    const navigate = useNavigate();
 
     async function handleSubmit(e) {
         e.preventDefault();
@@ -24,7 +28,12 @@ function Register() {
             }
         );
         const data = await response.json();
-        console.log(data);
+        if(!response.ok) {
+            setMessage(data.message);
+            return;
+        }
+        setMessage(data.message);
+        navigate("/login");
     }
 
     return (
@@ -53,7 +62,8 @@ function Register() {
                     onChange={(e) => setPassword(e.target.value)}
                 />
 
-                <button type="submit">Register</button>            
+                <button type="submit">Register</button>
+                {message && <p>{message}</p>}            
             </form>
         </div>
     );
