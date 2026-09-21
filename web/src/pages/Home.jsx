@@ -8,6 +8,7 @@ function Home() {
   const [error, setError] = useState("");
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState(null);
+  const [search, setSearch] = useState("");
 
   const token = localStorage.getItem("token");
 
@@ -23,7 +24,7 @@ function Home() {
         setError("");
 
       const response = await fetch(
-        `https://api.sricharan3435.workers.dev/blogs?page=${page}&limit=5`
+        `https://api.sricharan3435.workers.dev/blogs?page=${page}&limit=5&search=${search}`
       );
 
       if(!response.ok){
@@ -43,7 +44,7 @@ function Home() {
     }  
 
     fetchBlogs();
-  }, [page]);
+  }, [page, search]);
 
   return (
     <div className="app">
@@ -70,6 +71,13 @@ function Home() {
         <h2>Latest Blogs</h2>
         <p>Discover stories and ideas from our community.</p>
 
+        <input
+          type="text"
+          placeholder="Search blogs.."
+          value={search}
+          onChange={(e) => {setSearch(e.target.value); setPage(1);}}
+        />  
+
         <div className="blog-list">
           
           {loading ? (
@@ -80,7 +88,11 @@ function Home() {
             
             blogs.map((blog) => (
              <div className="blog-card" key={blog.id}>
-                <h3>{blog.title}</h3>
+                <h3>
+                  <Link to={`/blogs/${blog.id}`}>
+                    {blog.title}
+                  </Link>
+                </h3>
                 <p className="blog-author"> By {blog.author_name}</p>
                 <p className="blog-date">{new Date(blog.created_at).toLocaleDateString()}</p>
                 <p>{blog.content}</p>
