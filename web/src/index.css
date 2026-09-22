@@ -1,10 +1,2 @@
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background-color: #f8f9fa;
-  color: #222;
-}
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,500;6..72,600;6..72,700&display=swap');
+:root{font-family:"DM Sans",sans-serif;color:#1d211c;background:#f7f7f2;font-synthesis:none;text-rendering:optimizeLegibility}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;min-width:320px;min-height:100vh}button,input,textarea{font:inherit}button,a{-webkit-tap-highlight-color:transparent}a{color:inherit}::selection{background:#d9f99d;color:#17320d}

@@ -33,7 +33,7 @@ authRoutes.post("/register", validate(registerSchema), async(c) => {
   const hashedPassword = await hash(body.password, 10);
 
   await c.env.mini_blog_db
-  .prepare("INSERT INTO users (name, email, password) VALUES(?, ?, ?)")
+  .prepare("INSERT INTO users (name, email, password, created_at) VALUES(?, ?, ?, CURRENT_TIMESTAMP)")
   .bind(body.name, body.email, hashedPassword)
   .run();
 
@@ -88,6 +88,7 @@ authRoutes.post("/login", validate(loginSchema), async(c) => {
     success: true,
     message: "Login Successful",
     token: token,
+    user: { id: user.id, name: user.name, email: user.email },
   });
 
 });

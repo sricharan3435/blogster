@@ -35,7 +35,10 @@ blogRoutes.get("/blogs", async(c) => {
               SELECT 
                 blogs.id,blogs.title,blogs.content,
                 blogs.created_at, blogs.user_id,
-                users.name AS author_name
+                users.name AS author_name,
+                users.avatar_url AS author_avatar,
+                (SELECT COUNT(*) FROM likes WHERE blog_id = blogs.id) AS likes_count,
+                (SELECT COUNT(*) FROM comments WHERE blog_id = blogs.id) AS comments_count
               FROM blogs
                 JOIN users ON blogs.user_id = users.id
               WHERE blogs.title LIKE ? OR blogs.content LIKE ?
@@ -126,7 +129,10 @@ blogRoutes.get("/blogs/:id", validateBlogId, async (c) => {
       SELECT
         blogs.id, blogs.title, blogs.content,
         blogs.created_at, blogs.user_id,
-        users.name AS author_name FROM blogs JOIN users ON
+        users.name AS author_name, users.avatar_url AS author_avatar,
+        (SELECT COUNT(*) FROM likes WHERE blog_id = blogs.id) AS likes_count,
+        (SELECT COUNT(*) FROM comments WHERE blog_id = blogs.id) AS comments_count
+        FROM blogs JOIN users ON
         blogs.user_id = users.id WHERE blogs.id = ?
       `)
     .bind(id)

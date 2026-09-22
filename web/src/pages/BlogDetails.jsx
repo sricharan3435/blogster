@@ -1,48 +1,16 @@
-import { useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { Link, useParams } from "react-router-dom";
+import PageShell from "../components/PageShell";
+import { API_URL, formatDate } from "../lib/api";
 
-function BlogDetails() {
-
-    const {id} = useParams();
-
-    const [blog, setBlog] = useState(null);
-
-    const [error, setError] = useState("");
-
-    useEffect(() => {
-        async function fetchBlog() {
-            const response = await fetch(
-                `https://api.sricharan3435.workers.dev/blogs/${id}`
-            );
-
-            const data = await response.json();
-            if(!response.ok) {
-                setError(data.message);
-                return;
-            }
-            setBlog(data.blog);
-        }
-        fetchBlog();
-    }, [id]);
-
-    return (
-        <div className="main">
-            {error ? (
-                <p>{error}</p>
-            ) : blog ? (
-                <>
-                    <h2>{blog.title}</h2>
-                    <p className="blog-author">By {blog.author_name}</p>
-                    <p className="blog-date">
-                        {new Date(blog.created_at).toLocaleDateString()}
-                    </p>
-                    <p>{blog.content}</p>
-                </>
-            ) : (
-                <p>Loading blog...</p>
-            )}
-        </div>
-    );
+function BlogDetails(){
+  const {id}=useParams();const token=localStorage.getItem("token");const currentUser=JSON.parse(localStorage.getItem("user")||"null");
+  const [blog,setBlog]=useState(null);const [social,setSocial]=useState({likes_count:0,comments_count:0,comments:[]});const [liked,setLiked]=useState(false);const [comment,setComment]=useState("");const [error,setError]=useState("");const [submitting,setSubmitting]=useState(false);
+  const loadSocial=useCallback(async()=>{const response=await fetch(`${API_URL}/blogs/${id}/social`);if(response.ok)setSocial(await response.json());},[id]);
+  useEffect(()=>{const controller=new AbortController();async function load(){try{const response=await fetch(`${API_URL}/blogs/${id}`,{signal:controller.signal});const data=await response.json();if(!response.ok)throw new Error(data.message||"Story not found.");setBlog(data.blog);await loadSocial();if(token){const status=await fetch(`${API_URL}/blogs/${id}/like-status`,{headers:{Authorization:`Bearer ${token}`},signal:controller.signal});if(status.ok)setLiked((await status.json()).liked);}}catch(err){if(err.name!=="AbortError")setError(err.message);}}load();return()=>controller.abort();},[id,token,loadSocial]);
+  async function toggleLike(){if(!token)return;const response=await fetch(`${API_URL}/blogs/${id}/like`,{method:liked?"DELETE":"POST",headers:{Authorization:`Bearer ${token}`}});if(response.ok){setLiked(!liked);setSocial((value)=>({...value,likes_count:Number(value.likes_count)+(liked?-1:1)}));}}
+  async function addComment(e){e.preventDefault();if(!comment.trim())return;setSubmitting(true);const response=await fetch(`${API_URL}/blogs/${id}/comments`,{method:"POST",headers:{"Content-Type":"application/json",Authorization:`Bearer ${token}`},body:JSON.stringify({content:comment})});if(response.ok){setComment("");await loadSocial();}setSubmitting(false);}
+  async function deleteComment(commentId){const response=await fetch(`${API_URL}/comments/${commentId}`,{method:"DELETE",headers:{Authorization:`Bearer ${token}`}});if(response.ok)await loadSocial();}
+  return <PageShell><main className="content-shell"><article className="article"><Link className="back-link" to="/">← Back to all stories</Link>{error?<div className="state-card"><strong>We couldn’t open this story</strong>{error}</div>:!blog?<div className="state-card"><div className="spinner"/>Opening story…</div>:<><p className="eyebrow">Featured story</p><h1 className="detail-title">{blog.title}</h1><div className="article-meta"><span className="author-avatar">{blog.author_name?.charAt(0).toUpperCase()}</span><Link className="author-link" to={`/users/${blog.user_id}`}>By {blog.author_name}</Link><span className="meta-dot">•</span><time>{formatDate(blog.created_at)}</time></div><div className="article-body">{blog.content}</div><section className="story-social"><div className="reaction-bar">{token?<button className={`reaction-button ${liked?"liked":""}`} onClick={toggleLike}>{liked?"♥":"♡"} {social.likes_count} {Number(social.likes_count)===1?"like":"likes"}</button>:<Link className="reaction-button" to="/login">♡ {social.likes_count} likes</Link>}<span>◯ {social.comments_count} comments</span></div><div className="comments-section"><h2>Join the conversation</h2>{token?<form className="comment-form" onSubmit={addComment}><textarea value={comment} onChange={e=>setComment(e.target.value)} maxLength="1000" placeholder="Write a thoughtful response…" required/><button className="button button-small button-primary" disabled={submitting}>{submitting?"Posting…":"Post comment"}</button></form>:<p className="comment-signin"><Link to="/login">Sign in</Link> to leave a comment.</p>}<div className="comment-list">{social.comments.length?social.comments.map(item=><article className="comment" key={item.id}><div className="author-avatar">{item.author_avatar?<img src={item.author_avatar} alt=""/>:item.author_name.charAt(0).toUpperCase()}</div><div><div className="comment-head"><Link to={`/users/${item.user_id}`}>{item.author_name}</Link><time>{formatDate(item.created_at)}</time>{currentUser?.id===item.user_id&&<button onClick={()=>deleteComment(item.id)}>Delete</button>}</div><p>{item.content}</p></div></article>):<p className="empty-comments">No comments yet. Start the conversation.</p>}</div></div></section></>}</article></main></PageShell>;
 }
-
 export default BlogDetails;

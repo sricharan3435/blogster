@@ -2,8 +2,8 @@ import { Hono } from "hono";
 import type { Bindings, Variables } from "./types";
 import blogRoutes from "./routes/blog";
 import authRoutes from "./routes/auth";
-import { success } from "zod";
 import { cors } from "hono/cors";
+import socialRoutes from "./routes/social";
 
 
 const app = new Hono<{ 
@@ -30,16 +30,29 @@ app.onError((err, c) => {
 app.use(
   "*",
   cors({
-    origin: [
-      "http://localhost:5173",
-      "https://mini-blog-web.sricharan3435.workers.dev",
-    ],
+    origin: (origin) => {
+      if (origin === "https://mini-blog-web.sricharan3435.workers.dev") {
+        return origin;
+      }
+
+      try {
+        const url = new URL(origin);
+        const isLocalDevelopment =
+          url.protocol === "http:" &&
+          (url.hostname === "localhost" || url.hostname === "127.0.0.1");
+
+        return isLocalDevelopment ? origin : undefined;
+      } catch {
+        return undefined;
+      }
+    },
   })
 );
 
 app.route("/", blogRoutes);
 
 app.route("/", authRoutes);
+app.route("/", socialRoutes);
 
 
 

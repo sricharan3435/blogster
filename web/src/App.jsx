@@ -6,6 +6,11 @@ import MyBlogs from "./pages/MyBlogs";
 import CreateBlog from "./pages/CreateBlog";
 import BlogDetails from "./pages/BlogDetails";
 import EditBlog from "./pages/EditBlog";
+import Profile from "./pages/Profile";
+import EditProfile from "./pages/EditProfile";
+import "./App.css";
+import "./social.css";
+import "./theme.css";
 
 function App() {
   return (
@@ -17,6 +22,8 @@ function App() {
       <Route path="/create" element={<CreateBlog />} />
       <Route path="/blogs/:id" element={<BlogDetails />} />
       <Route path="/blogs/:id/edit" element={<EditBlog />} />
+      <Route path="/users/:id" element={<Profile />} />
+      <Route path="/profile/edit" element={<EditProfile />} />
     </Routes>
   );  
 }
