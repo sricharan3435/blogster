@@ -84,7 +84,9 @@ function Home() {
             <p>Loading blogs...</p>
           ) : error ? (
             <p>{error}</p>
-          ) : (
+          ) : blogs.length === 0 ? (
+            <p>No blogs found..</p>
+          ) : (  
             
             blogs.map((blog) => (
              <div className="blog-card" key={blog.id}>

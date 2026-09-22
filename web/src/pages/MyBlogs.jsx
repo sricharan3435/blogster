@@ -1,11 +1,16 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 
 function MyBlogs() {
 
     const [blogs, setBlogs] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
     const token = localStorage.getItem("token");
+
+    if(!token) {
+        return <Navigate to="/login" />;
+    }
 
     useEffect(() => {
         async function fetchMyBlogs() {
@@ -19,7 +24,7 @@ function MyBlogs() {
             );
             const data = await response.json();
             if (!response.ok) {
-                console.log(data.message);
+                setError(data.message);
                 setLoading(false);
                 return;
             }
@@ -63,7 +68,8 @@ function MyBlogs() {
             <h2>My Blogs</h2>
             {loading ? (
                 <p>Loading your blogs..</p>
-            
+            ) : error ? (    
+                <p>{error}</p>
             ) : blogs.length === 0 ? (
                 <p>You haven't created any blogs yet.</p>
             ) : (

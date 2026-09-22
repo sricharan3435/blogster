@@ -7,6 +7,8 @@ function BlogDetails() {
 
     const [blog, setBlog] = useState(null);
 
+    const [error, setError] = useState("");
+
     useEffect(() => {
         async function fetchBlog() {
             const response = await fetch(
@@ -15,7 +17,7 @@ function BlogDetails() {
 
             const data = await response.json();
             if(!response.ok) {
-                console.log(data);
+                setError(data.message);
                 return;
             }
             setBlog(data.blog);
@@ -25,7 +27,9 @@ function BlogDetails() {
 
     return (
         <div className="main">
-            {blog ? (
+            {error ? (
+                <p>{error}</p>
+            ) : blog ? (
                 <>
                     <h2>{blog.title}</h2>
                     <p className="blog-author">By {blog.author_name}</p>

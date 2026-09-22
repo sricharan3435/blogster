@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
 
 
 function EditBlog() {
@@ -12,6 +12,10 @@ function EditBlog() {
     const [content, setContent] = useState("");
 
     const token = localStorage.getItem("token");
+
+    if(!token) {
+        return <Navigate to="/login" />;
+    }
 
     useEffect(() => {
         async function fetchBlog() {
