@@ -30,7 +30,10 @@ app.onError((err, c) => {
 app.use(
   "*",
   cors({
-    origin: "http://localhost:5173",
+    origin: [
+      "http://localhost:5173",
+      "https://mini-blog-web.sricharan3435.workers.dev",
+    ],
   })
 );
 
