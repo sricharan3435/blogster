@@ -251,7 +251,7 @@ Production secrets should be stored with Wrangler rather than committed to Git:
 
 ```bash
 cd api
-npx wrangler secret put JWT_SECRET
+npx wrangler secret put JWT_SIGNING_SECRET
 ```
 
 ## Step 5 — Add authentication endpoints

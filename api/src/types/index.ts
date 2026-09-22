@@ -1,6 +1,6 @@
 export type Bindings = {
     mini_blog_db: D1Database;
-    JWT_SECRET: string;
+    JWT_SIGNING_SECRET: string;
 };
 
 export type User = {

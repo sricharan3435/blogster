@@ -17,7 +17,7 @@ export async function authMiddleware(c: any, next: any) {
     const token = authHeader.split(" ")[1];
 
     try{
-        const payload = await verify(token, c.env.JWT_SECRET, "HS256");
+        const payload = await verify(token, c.env.JWT_SIGNING_SECRET, "HS256");
 
         c.set("user", payload);
 

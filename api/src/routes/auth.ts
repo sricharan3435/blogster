@@ -81,7 +81,7 @@ authRoutes.post("/login", validate(loginSchema), async(c) => {
     {
       id: user.id,
     },
-    c.env.JWT_SECRET
+    c.env.JWT_SIGNING_SECRET
   );
 
   return c.json({
